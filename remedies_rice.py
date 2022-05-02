@@ -1,5 +1,6 @@
-def remedy(disease, language):
-    if disease == "BacterialBlight":
+def remedy(disease):
+    disease = disease.casefold()
+    if disease == "BacterialBlight".casefold():
         remedy_text = """BACTERIAL BLIGHT REMEDIES
 
 Preventive method
@@ -16,7 +17,7 @@ Cultural methods
 5.Avoid flow of water from affected fields
 6.Maintain proper plant spacing"""
 
-    elif disease == 'Blast' or disease == 'LeafBlast':
+    elif disease == 'Blast'.casefold() or disease == 'LeafBlast'.casefold():
         remedy_text = """BLAST REMEDIES
 Preventive Measures 
 1. Use healthy or certified seed material.
@@ -36,7 +37,7 @@ silicon content.
 in the field. 
 13. Plan a crop rotation as a simple and effective way to reduce populations."""
 
-    elif disease == 'Brownspot':
+    elif disease == 'Brownspot'.casefold():
         remedy_text = """BROWN SPOT REMEDIES
  
 Cultural methods
@@ -53,7 +54,7 @@ Preventive methods
 
 """
 
-    elif disease == 'Hispa':
+    elif disease == 'Hispa'.casefold():
         remedy_text = """1.Avoid over fertilizing the field.
 2.Close plant spacing results in greater leaf densities that can tolerate higher hispa numbers.
 3.Leaf tip containing blotch mines should be destroyed.
@@ -86,10 +87,7 @@ Spray Two rounds of any one of the following insecticides
 ◦ Monocrotophos 36 WSC (40 ml/ha)
 ◦ Fenthion 100 EC (40 ml/ha) may be sprayed 15 and 30 days after transplanting."""
 
-    elif disease == 'LeafBlast':
-        remedy_text = "NO INFO AVAILABLE"
-
-    elif disease == 'Tungro':
+    elif disease == 'Tungro'.casefold():
         remedy_text = """Trap methods:
 
 Light traps are to be set up to attract and control the leaf hopper vectors as well as to monitor the population.
@@ -119,3 +117,5 @@ Imidacloprid 17.8 SL 100ml/ha at 15 and 30 days after transplanting. The vegetat
 
     else:
         remedy_text = "You have a Healthy crop"
+
+    return remedy_text

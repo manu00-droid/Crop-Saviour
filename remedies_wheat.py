@@ -26,7 +26,13 @@ decided on the basis of growing stage of the crop."""
         remedy_text = """NO REMEDY AVAILABLE"""
 
     elif disease == 'SEPTORIA'.casefold():
-        remedy_text = """NO REMEDY AVAILABLE"""
+        remedy_text = """Grow a variety with a high septoria tritici resistance rating
+Avoid early drilling, especially of susceptible varieties
+The T2 fungicide timing is the most crucial, with T1 also targeted at septoria tritici control. However, the T0 spray rarely gives a yield benefit
+Use a balanced mixture of an azole with a multisite (where possible). Only add an SDHI when disease risk merits it
+Use the lowest dose possible to get the required control, but ensure that each component of the mix gives comparable levels of control"""
 
     else:
-        remedy_text = """CROP IS HEALTHY"""
+        remedy_text = """YOUR CROP IS HEALTHY"""
+
+    return remedy_text
