@@ -15,7 +15,13 @@ Cultural methods
 3.Drain the field (except at flowering stage of the crop)
 4.Destruction of weeds and  collateral hosts
 5.Avoid flow of water from affected fields
-6.Maintain proper plant spacing"""
+6.Maintain proper plant spacing
+
+
+FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
+
+OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
+
 
     elif disease == 'Blast'.casefold() or disease == 'LeafBlast'.casefold():
         remedy_text = """BLAST REMEDIES
@@ -35,11 +41,16 @@ silicon content.
 11. Monitor your field regularly for symptoms. 
 12. Destroy all infected plant residues to prevent the carry-over of the fungus 
 in the field. 
-13. Plan a crop rotation as a simple and effective way to reduce populations."""
+13. Plan a crop rotation as a simple and effective way to reduce populations.
+
+
+FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
+
+OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
 
     elif disease == 'Brownspot'.casefold():
         remedy_text = """BROWN SPOT REMEDIES
- 
+
 Cultural methods
 1.As disease is seed borne,Use disease free seeds.
 2.Removal of alternate & collateral hosts.
@@ -52,6 +63,10 @@ Preventive methods
 2.seed soak / seed treatment with Captan or  Thiram at 2.0g /kg of seed
 3.Since the fungus is seed transmitted, a hot water seed treatment (53-54°C) for 10-12 minutes may be effective before sowing. This treatment controls primary infection at the seedling stage. Presoaking the seed in cold water for 8 hours increases effectivity of the treatment.
 
+
+FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
+
+OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) 
 """
 
     elif disease == 'Hispa'.casefold():
@@ -85,7 +100,12 @@ Chemical methods
 
 Spray Two rounds of any one of the following insecticides
 ◦ Monocrotophos 36 WSC (40 ml/ha)
-◦ Fenthion 100 EC (40 ml/ha) may be sprayed 15 and 30 days after transplanting."""
+◦ Fenthion 100 EC (40 ml/ha) may be sprayed 15 and 30 days after transplanting.
+
+
+FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
+
+OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
 
     elif disease == 'Tungro'.casefold():
         remedy_text = """Trap methods:
@@ -113,7 +133,12 @@ In nursery when virus infection is low, apply Carbofuran granules @ 1 kg/ha to c
 During pre-tillering to mid-tillering when one affected hill/m is observed start application of Carbofuran granules @ 3.5kg/ha to control insect vector.
 Spray Two rounds of any one of the following insecticides
 Thiamethoxam 25 WDG 100g/ha (or)
-Imidacloprid 17.8 SL 100ml/ha at 15 and 30 days after transplanting. The vegetation on the bunds should also be sprayed with the insecticides.  e"""
+Imidacloprid 17.8 SL 100ml/ha at 15 and 30 days after transplanting. The vegetation on the bunds should also be sprayed with the insecticides.  
+
+FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
+
+
+OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
 
     else:
         remedy_text = "You have a Healthy crop"
