@@ -4,6 +4,7 @@ from telegram.ext import *
 from requests import *
 from PIL import Image
 import os
+import Inference
 from torchvision import transforms
 import remedies_rice
 import remedies_wheat
@@ -156,11 +157,17 @@ def image_handler(update, context):
 
     elif crop == 1:
         prediction = proc_wheat(im)
-        update.message.reply_text(fin_wheat[prediction])
-        # update.message.reply_text(remedies_rice(fin_wheat[prediction]))
-        translated_text = translator.translation(remedies_wheat.remedy(fin_wheat[prediction]), lang)
-        update.message.reply_text(translated_text)
-        text_to_speech.text_to_speech(text=translated_text, file_name=username)
+        for i in range(6):
+            if prediction[i][1]>0.5:
+                update.message.reply_text(prediction[i][0])
+                # update.message.reply_text(remedies_wheat.remedy(fin_wheat[i]))
+                translated_text = translator.translation(remedies_wheat.remedy(prediction[i][0]), lang)
+                update.message.reply_text(translated_text)
+                text_to_speech.text_to_speech(text=translated_text, file_name=username)
+        # update.message.reply_text(fin_wheat[prediction])
+        # # update.message.reply_text(remedies_rice(fin_wheat[prediction]))
+        # translated_text = translator.translation(remedies_wheat.remedy(fin_wheat[prediction]), lang)
+
         # sendAudio(username,f"{username}.mp3")
 
 
@@ -186,21 +193,21 @@ def proc_rice(im):
 
 def proc_wheat(im):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model_w = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/wheat.pt')
+    # model_w = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/wheat.pt')
     path_full = os.path.join('/home/kratoes669/', im)
-    img = Image.open(path_full)
-    tfms = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    img_t = tfms(img)
-    img_t = img_t.unsqueeze(0)
-    img_t = img_t.to(device)
-    output = model_w(img_t)
-    prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
-    return prediction
+    pred=Inference.DiseaseClassification(filename = path_full)
+    # tfms = transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    # ])
+    # img_t = tfms(img)
+    # img_t = img_t.unsqueeze(0)
+    # img_t = img_t.to(device)
+    # output = model_w(img_t)
+    # prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
+    return pred
 
 
 conv_handler = ConversationHandler(
