@@ -1,10 +1,10 @@
 import torch
+from torchvision import transforms
 import model
 import os
 import cv2
-import albumentations as A
+import torch
 import numpy as np
-from albumentations.pytorch import ToTensorV2
 
 
 class DiseaseClassification:
@@ -17,7 +17,7 @@ class DiseaseClassification:
                                         eps = 1e-08,
                                         weight_decay = 0.000001,
                                         amsgrad = False)
-        self.checkpoint = os.getcwd() + "/Model/DiseaseClassification.pt"
+        self.checkpoint = "DiseaseClassification.pt"
         self.classNameEnglish = ["Healthy", "Leaf Rust", "Powdery Mildew", "Seedling", "Septoria","Stem Rust", "Yellow Rust"]
 
     def loadCheckpoint(self, model, optimizer):
@@ -36,13 +36,14 @@ class DiseaseClassification:
         return ResizedImage
     
     def normalizeImage(self, image):
-        transform = A.Compose([
-            A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-            ToTensorV2()
+
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
-        Transformed = transform(image = image)
-        TransformedImage = Transformed["image"]
-        return TransformedImage
+        transformed = transform(image)
+        # TransformedImage = Transformed["image"]
+        return transformed
 
     def prediction(self):
         
@@ -78,8 +79,8 @@ class DiseaseClassification:
             #Top Prediction
             PredictedLabels = np.argsort(outputProb)
             for i in range(7):
-                englishTup = (self.classNameEnglish[PredictedLabels[i]], outputProb[PredictedLabels[i]])
-                English.append(englishTup)
+                English.append([self.classNameEnglish[PredictedLabels[i]], outputProb[PredictedLabels[i]]])
+                # English.append(englishTup)
                 # print("{}".format(self.classNameEnglish[PredictedLabels[i]]) + "(Confidence = {:.3})".format(outputProb[PredictedLabels[i]]))
                 # print("{}".format(self.classNameHindi[PredictedLabels[i]]) + "(आत्मविश्वास = {:.3})".format(outputProb[PredictedLabels[i]]))
                 # print("{}".format(self.classNamePunjabi[PredictedLabels[i]] )+"(ਦਾ ਭਰੋਸਾ = {:.3})".format(outputProb[PredictedLabels[i]]))
@@ -90,7 +91,7 @@ class DiseaseClassification:
 if __name__ == "__main__":
     imagePath = os.getcwd() + "/Data" + "/wfd_dataset" + "/40c08000e0f8fdfe.jpg"
     DC = DiseaseClassification(filename = imagePath)
-    English, Hindi, Punjabi = DC.prediction()
+    English= DC.prediction()
 
 
 
