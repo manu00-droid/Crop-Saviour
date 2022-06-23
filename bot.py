@@ -4,10 +4,11 @@ from telegram.ext import *
 from requests import *
 from PIL import Image
 import os
+import Inference
 from torchvision import transforms
 import remedies_rice
 import remedies_wheat
-import text_to_speech
+#import text_to_speech
 import translator
 
 global count
@@ -68,28 +69,28 @@ def queryHandler(update: Update, context: CallbackContext):
     return SECOND
 
 
-def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None,
-               reply_to_message_id=None, reply_markup=None, parse_mode=None, disable_notification=None,
-               timeout=None, thumb=None):
-    """
-    Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .mp3 format.
-    :param chat_id:Unique identifier for the message recipient
-    :param audio:Audio file to send.
-    :param caption:
-    :param duration:Duration of the audio in seconds
-    :param performer:Performer
-    :param title:Track name
-    :param reply_to_message_id:If the message is a reply, ID of the original message
-    :param reply_markup:
-    :param parse_mode
-    :param disable_notification:
-    :param timeout:
-:param thumb:
-    :return: Message
-    """
-    return types.Message.de_json(
-        apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
-                             reply_markup, parse_mode, disable_notification, timeout, thumb))
+# def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None,
+#                reply_to_message_id=None, reply_markup=None, parse_mode=None, disable_notification=None,
+#                timeout=None, thumb=None):
+#     """
+#     Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .mp3 format.
+#     :param chat_id:Unique identifier for the message recipient
+#     :param audio:Audio file to send.
+#     :param caption:
+#     :param duration:Duration of the audio in seconds
+#     :param performer:Performer
+#     :param title:Track name
+#     :param reply_to_message_id:If the message is a reply, ID of the original message
+#     :param reply_markup:
+#     :param parse_mode
+#     :param disable_notification:
+#     :param timeout:
+# :param thumb:
+#     :return: Message
+#     """
+#     return types.Message.de_json(
+#         apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
+#                              reply_markup, parse_mode, disable_notification, timeout, thumb))
 
 
 def model_selection(update: Update, context: CallbackContext):
@@ -147,28 +148,34 @@ def image_handler(update, context):
         # update.message.reply_text(remedies_rice.remedy(fin_rice[prediction]))
         translated_text = translator.translation(remedies_rice.remedy(fin_rice[prediction]), lang)
         update.message.reply_text(translated_text)
-        text_to_speech.text_to_speech(text=translated_text, file_name=username)
+        #text_to_speech.text_to_speech(text=translated_text, file_name=username)
         # sendAudio(username,f"{username}.mp3")
         # context.bot.sendAudio(username,f"/home/kratoes669/{username}.mp3")
         # send_audio(self, username,f"/home/kratoes669/{username}.mp3")
-        context.bot.send_audio(chat_id=username, audio=open(f"/home/kratoes669/{username}.mp3", 'rb'))
+        #context.bot.send_audio(chat_id=username, audio=open(f"/home/kratoes669/{username}.mp3", 'rb'))
 
 
     elif crop == 1:
         prediction = proc_wheat(im)
-        update.message.reply_text(fin_wheat[prediction])
-        # update.message.reply_text(remedies_rice(fin_wheat[prediction]))
-        translated_text = translator.translation(remedies_wheat.remedy(fin_wheat[prediction]), lang)
-        update.message.reply_text(translated_text)
-        text_to_speech.text_to_speech(text=translated_text, file_name=username)
+        for i in range(7):
+            if prediction[i][1]>0.5:
+                update.message.reply_text(prediction[i][0])
+                # update.message.reply_text(remedies_wheat.remedy(fin_wheat[i]))
+                translated_text = translator.translation(remedies_wheat.remedy(str(prediction[i][0])), lang)
+                update.message.reply_text(translated_text)
+                #text_to_speech.text_to_speech(text=translated_text, file_name=username)
+        # update.message.reply_text(fin_wheat[prediction])
+        # # update.message.reply_text(remedies_rice(fin_wheat[prediction]))
+        # translated_text = translator.translation(remedies_wheat.remedy(fin_wheat[prediction]), lang)
+
         # sendAudio(username,f"{username}.mp3")
 
 
 def proc_rice(im):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/rice.pt')
-    path_full = os.path.join('/home/kratoes669/', im)
-    img = Image.open(path_full)
+    model = torch.load('rice.pt',map_location=device)
+  #  path_full = os.path.join('/home/kratoes669/', im)
+    img = Image.open(im)
 
     tfms = transforms.Compose([
         transforms.Resize(256),
@@ -180,27 +187,29 @@ def proc_rice(im):
     img_t = img_t.unsqueeze(0)
     img_t = img_t.to(device)
     output = model(img_t)
-    prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
+    prediction =int(torch.max(output.cpu().data, 1)[1].numpy())
     return prediction
 
 
 def proc_wheat(im):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model_w = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/wheat.pt')
-    path_full = os.path.join('/home/kratoes669/', im)
-    img = Image.open(path_full)
-    tfms = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    img_t = tfms(img)
-    img_t = img_t.unsqueeze(0)
-    img_t = img_t.to(device)
-    output = model_w(img_t)
-    prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
-    return prediction
+    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # model_w = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/wheat.pt')
+    #path_full = os.path.join('/home/kratoes669/', im)
+    DC = Inference.DiseaseClassification(filename = im)
+    pred= DC.prediction()
+    # tfms = transforms.Compose([
+    #     transforms.Resize(256),
+    #     transforms.CenterCrop(224),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    # ])
+    # img_t = tfms(img)
+    # img_t = img_t.unsqueeze(0)
+    # img_t = img_t.to(device)
+    # output = model_w(img_t)
+    # prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
+    print(pred)
+    return pred
 
 
 conv_handler = ConversationHandler(
