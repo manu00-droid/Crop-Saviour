@@ -1,6 +1,6 @@
 def remedy(disease):
     disease = disease.casefold()
-    if disease == "BacterialBlight".casefold():
+    if disease == "Bacterial Blight".casefold():
         remedy_text = """BACTERIAL BLIGHT REMEDIES
 
 Preventive method
@@ -23,7 +23,7 @@ FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
 OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
 
 
-    elif disease == 'Blast'.casefold() or disease == 'LeafBlast'.casefold():
+    elif disease == 'Blast'.casefold() or disease == 'Leaf Blast'.casefold():
         remedy_text = """BLAST REMEDIES
 Preventive Measures 
 1. Use healthy or certified seed material.

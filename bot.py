@@ -8,7 +8,6 @@ import Inference
 from torchvision import transforms
 import remedies_rice
 import remedies_wheat
-#import text_to_speech
 import translator
 
 global count
@@ -23,7 +22,9 @@ wheat = ["🌾गेहूँ🌾", "🌾ਕਣਕ🌾", "🌾wheat🌾"]
 rice = ["🍚चावल🍚", "🍚ਚੌਲ🍚", "🍚rice🍚"]
 lang = ""
 crop = 0
-fin_rice = {0: "BacterialBlight", 1: "Blast", 2: "Brownspot", 3: "Healthy", 4: "Hispa", 5: "LeafBlast", 6: "Tungro"}
+#Rice diseases
+fin_rice = {0: "Bacterial Blight", 1: "Blast", 2: "Brownspot", 3: "Healthy", 4: "Hispa", 5: "Leaf Blast", 6: "Tungro"}
+#Wheat diseases
 fin_wheat = {0: "Healthy", 1: "leaf rust", 2: "Powdery Mildew", 3: "seedlings", 4: "Septoria", 5: "Stem Rust",
              6: "Yellow rust"}
 
@@ -31,7 +32,6 @@ fin_wheat = {0: "Healthy", 1: "leaf rust", 2: "Powdery Mildew", 3: "seedlings", 
 def startCommand(update: Update, context: CallbackContext):
     global username
     username = update.message.chat_id
-    # print(username)
     buttons = [[InlineKeyboardButton(HindiLang, callback_data="Hindi")],
                [InlineKeyboardButton(PunjLang, callback_data="Punjabi")],
                [InlineKeyboardButton(EngLang, callback_data="English")]]
@@ -69,45 +69,23 @@ def queryHandler(update: Update, context: CallbackContext):
     return SECOND
 
 
-# def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None,
-#                reply_to_message_id=None, reply_markup=None, parse_mode=None, disable_notification=None,
-#                timeout=None, thumb=None):
-#     """
-#     Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .mp3 format.
-#     :param chat_id:Unique identifier for the message recipient
-#     :param audio:Audio file to send.
-#     :param caption:
-#     :param duration:Duration of the audio in seconds
-#     :param performer:Performer
-#     :param title:Track name
-#     :param reply_to_message_id:If the message is a reply, ID of the original message
-#     :param reply_markup:
-#     :param parse_mode
-#     :param disable_notification:
-#     :param timeout:
-# :param thumb:
-#     :return: Message
-#     """
-#     return types.Message.de_json(
-#         apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
-#                              reply_markup, parse_mode, disable_notification, timeout, thumb))
+def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None, reply_to_message_id=None,
+               reply_markup=None, parse_mode=None, disable_notification=None, timeout=None, thumb=None):
+    return types.Message.de_json(
+        apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
+                             reply_markup, parse_mode, disable_notification, timeout, thumb))
 
 
 def model_selection(update: Update, context: CallbackContext):
     query = update.callback_query.data
     update.callback_query.answer()
-    # print(query)
     global lang
     global crop
     if query == "wheat":
-        # print("aabc")
-        # print(lang)
         crop = 1
-        # print(crop)
         if lang == "Punjabi":
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text="ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਫਸਲ ਦੀਆਂ ਤਸਵੀਰਾਂ ਅਪਲੋਡ ਕਰੋ...")
-
         if lang == "Hindi":
             context.bot.send_message(chat_id=update.effective_chat.id, text="कृपया अपनी फसल की तस्वीरें अपलोड करें....")
         if lang == "English":
@@ -118,7 +96,6 @@ def model_selection(update: Update, context: CallbackContext):
         if lang == "Punjabi":
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text="ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਫਸਲ ਦੀਆਂ ਤਸਵੀਰਾਂ ਅਪਲੋਡ ਕਰੋ...")
-
         if lang == "Hindi":
             context.bot.send_message(chat_id=update.effective_chat.id, text="कृपया अपनी फसल की तस्वीरें अपलोड करें....")
 
@@ -132,7 +109,6 @@ def image_handler(update, context):
     global username
     file = update.message.photo[-1].get_file()
     im = file.download()
-    # print(crop)
     if lang == "Hindi":
         update.message.reply_text("कृपया प्रतीक्षा करें|......")
 
@@ -142,41 +118,54 @@ def image_handler(update, context):
     if lang == "English":
         update.message.reply_text("Please wait....")
 
+    #if crop type is rice
     if crop == 0:
-        prediction = proc_rice(im)
+        prediction = proc_rice(im)              #Passing Image to Rice Model for classification and storing the diesease in prediction variable
         update.message.reply_text(fin_rice[prediction])
-        # update.message.reply_text(remedies_rice.remedy(fin_rice[prediction]))
-        translated_text = translator.translation(remedies_rice.remedy(fin_rice[prediction]), lang)
+        translated_text = translator.translation(remedies_rice.remedy(fin_rice[prediction]), lang)      #Sending remedies for the disease in desired language
         update.message.reply_text(translated_text)
-        #text_to_speech.text_to_speech(text=translated_text, file_name=username)
-        # sendAudio(username,f"{username}.mp3")
-        # context.bot.sendAudio(username,f"/home/kratoes669/{username}.mp3")
-        # send_audio(self, username,f"/home/kratoes669/{username}.mp3")
-        #context.bot.send_audio(chat_id=username, audio=open(f"/home/kratoes669/{username}.mp3", 'rb'))
 
+        #Sending audio files
+        context.bot.send_audio(chat_id=username,
+                               audio=open(
+                                   f"Audios/{fin_rice[prediction]}_rice_{lang.lower()}.mp3",
+                                   'rb'))
 
+    #if crop type is wheat
     elif crop == 1:
-        prediction = proc_wheat(im)
+        prediction = proc_wheat(im)             #Passing image to wheat model and storing the list returned by it
         for i in range(7):
-            if prediction[i][1]>0.5:
+            if prediction[i][1] > 0.5:          #Searching for the probabilty of disease which is greater than 0.5
                 update.message.reply_text(prediction[i][0])
-                # update.message.reply_text(remedies_wheat.remedy(fin_wheat[i]))
-                translated_text = translator.translation(remedies_wheat.remedy(str(prediction[i][0])), lang)
+                translated_text = translator.translation(remedies_wheat.remedy(prediction[i][0]), lang)     #translating the remedy of disease in desired language
                 update.message.reply_text(translated_text)
-                #text_to_speech.text_to_speech(text=translated_text, file_name=username)
-        # update.message.reply_text(fin_wheat[prediction])
-        # # update.message.reply_text(remedies_rice(fin_wheat[prediction]))
-        # translated_text = translator.translation(remedies_wheat.remedy(fin_wheat[prediction]), lang)
 
-        # sendAudio(username,f"{username}.mp3")
+                ####Sending audio files:
+                #looking for rust word in the disease as all rust disease have similar remedies
+                disease_wheat_list = prediction[i][0].split()
+                rust_exists = False
+                for i in disease_wheat_list:
+                    if i.casefold() == "rust":
+                        rust_exists = True
+                try:
+                    if rust_exists:
+                        context.bot.send_audio(chat_id=username,
+                                               audio=open(
+                                                   f"Audios/Rust_wheat_{lang.lower()}.mp3",
+                                                   'rb'))
+                    context.bot.send_audio(chat_id=username,
+                                           audio=open(
+                                               f"Audios/{prediction[i][0]}_wheat_{lang.lower()}.mp3",
+                                               'rb'))
+                except:
+                    update.message.reply_text("No audio Available")
 
+#RICE MODEL
 
 def proc_rice(im):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = torch.load('rice.pt',map_location=device)
-  #  path_full = os.path.join('/home/kratoes669/', im)
+    model = torch.load('rice.pt', map_location=device)
     img = Image.open(im)
-
     tfms = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
@@ -187,16 +176,17 @@ def proc_rice(im):
     img_t = img_t.unsqueeze(0)
     img_t = img_t.to(device)
     output = model(img_t)
-    prediction =int(torch.max(output.cpu().data, 1)[1].numpy())
+    prediction = int(torch.max(output.cpu().data, 1)[1].numpy())
     return prediction
 
+#WHEAT MODEL
 
 def proc_wheat(im):
-    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # model_w = torch.load('/home/kratoes669/PycharmProjects/Crop_Saviour/wheat.pt')
-    #path_full = os.path.join('/home/kratoes669/', im)
-    DC = Inference.DiseaseClassification(filename = im)
-    pred= DC.prediction()
+    # path_full = os.path.join('/home/kratoes669/', im)
+    DC = Inference.DiseaseClassification(filename=im)
+    pred = DC.prediction()
     # tfms = transforms.Compose([
     #     transforms.Resize(256),
     #     transforms.CenterCrop(224),

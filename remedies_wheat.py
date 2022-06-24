@@ -34,7 +34,7 @@ FOR MORE INFO VISIT https://farmer.gov.in/FarmerHome.aspx
 
 OR CONTACT KISAN CALL CENTER (KCC) (Toll Free No.1800-180-1551) """
 
-    elif disease == 'SEEDLINGS'.casefold():
+    elif disease == 'SEEDLING'.casefold():
         remedy_text = """NO REMEDY AVAILABLE"""
 
     elif disease == 'SEPTORIA'.casefold():
