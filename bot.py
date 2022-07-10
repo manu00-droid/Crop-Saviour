@@ -3,12 +3,12 @@ import torch
 from telegram.ext import *
 from requests import *
 from PIL import Image
-import os
 import Inference
 from torchvision import transforms
 import remedies_rice
 import remedies_wheat
 import translator
+from mandi import prices
 
 global count
 updater = Updater(token="5212231888:AAE7Wm-esVXOpyckA2W15hhyFvKbshs1QjQ")
@@ -20,6 +20,7 @@ PunjLang = "ਪੰਜਾਬੀ"
 EngLang = "English"
 wheat = ["🌾गेहूँ🌾", "🌾ਕਣਕ🌾", "🌾wheat🌾"]
 rice = ["🍚चावल🍚", "🍚ਚੌਲ🍚", "🍚rice🍚"]
+mandi = ["💸मंडी की कीमतें💸","💸ਮੰਡੀ ਦੀਆਂ ਕੀਮਤਾਂ💸","💸mandi prices💸"]
 lang = ""
 crop = 0
 #Rice diseases
@@ -48,32 +49,36 @@ def queryHandler(update: Update, context: CallbackContext):
     if "Hindi" in query:
         lang = "Hindi"
         buttons = [[InlineKeyboardButton(wheat[0], callback_data="wheat")],
-                   [InlineKeyboardButton(rice[0], callback_data="rice")]]
+                   [InlineKeyboardButton(rice[0], callback_data="rice")],
+                   [InlineKeyboardButton(mandi[0],callback_data="mandi")]
+                   ]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="आप किस फसल के बारे में जानना चाहते हैं?")
 
     if "Punjabi" in query:
         lang = "Punjabi"
         buttons = [[InlineKeyboardButton(wheat[1], callback_data="wheat")],
-                   [InlineKeyboardButton(rice[1], callback_data="rice")]]
+                   [InlineKeyboardButton(rice[1], callback_data="rice")],
+                   [InlineKeyboardButton(mandi[1],callback_data="mandi")]]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="ਤੁਸੀਂ ਕਿਸ ਫਸਲ ਬਾਰੇ ਜਾਣਨਾ ਚਾਹੁੰਦੇ ਹੋ?")
 
     if "English" in query:
         lang = "English"
         buttons = [[InlineKeyboardButton(wheat[2], callback_data="wheat")],
-                   [InlineKeyboardButton(rice[2], callback_data="rice")]]
+                   [InlineKeyboardButton(rice[2], callback_data="rice")],
+                   [InlineKeyboardButton(mandi[2],callback_data="mandi")]]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="Which crop do you want to know about?")
 
     return SECOND
 
 
-def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None, reply_to_message_id=None,
-               reply_markup=None, parse_mode=None, disable_notification=None, timeout=None, thumb=None):
-    return types.Message.de_json(
-        apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
-                             reply_markup, parse_mode, disable_notification, timeout, thumb))
+# def send_audio(self, chat_id, audio, caption=None, duration=None, performer=None, title=None, reply_to_message_id=None,
+#                reply_markup=None, parse_mode=None, disable_notification=None, timeout=None, thumb=None):
+#     return types.Message.de_json(
+#         apihelper.send_audio(self.token, chat_id, audio, caption, duration, performer, title, reply_to_message_id,
+#                              reply_markup, parse_mode, disable_notification, timeout, thumb))
 
 
 def model_selection(update: Update, context: CallbackContext):
@@ -91,7 +96,7 @@ def model_selection(update: Update, context: CallbackContext):
         if lang == "English":
             context.bot.send_message(chat_id=update.effective_chat.id, text="Please upload the images of your crops...")
 
-    if query == "rice":
+    elif query == "rice":
         crop = 0
         if lang == "Punjabi":
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -101,7 +106,21 @@ def model_selection(update: Update, context: CallbackContext):
 
         if lang == "English":
             context.bot.send_message(chat_id=update.effective_chat.id, text="Please upload the images of your crops...")
+    elif query == "mandi":
+        if lang == "Punjabi":
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="ਕਿਰਪਾ ਕਰਕੇ ਦਾਖਲ ਕਰੋ <ਰਾਜ,ਵਸਤੂ>")
+        if lang == "Hindi":
+            context.bot.send_message(chat_id=update.effective_chat.id, text="कृपया दर्ज करें: <राज्य,वस्तु>")
 
+        if lang == "English":
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter <name of your state, commodity>")
+        user_input = update.message.text
+        prices(user_input,context,update)
+
+def mandi_handle(update, context):
+    user_input = update.message.text
+    prices(user_input,context,update,lang)
 
 def image_handler(update, context):
     global crop
@@ -218,5 +237,5 @@ dispatcher.add_handler(CommandHandler("start", startCommand))
 dispatcher.add_handler(CallbackQueryHandler(queryHandler))
 dispatcher.add_handler(CallbackQueryHandler(model_selection))
 dispatcher.add_handler(MessageHandler(Filters.photo, image_handler))
-
+dispatcher.add_handler(MessageHandler(Filters.text, mandi_handle))
 updater.start_polling()
