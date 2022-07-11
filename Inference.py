@@ -79,7 +79,7 @@ class DiseaseClassification:
             #Top Prediction
             PredictedLabels = np.argsort(outputProb)
             for i in range(7):
-                English.append([self.classNameEnglish[PredictedLabels[i]], outputProb[PredictedLabels[i]]])
+                English.append([self.classNameEnglish[PredictedLabels[i]], outputProb[PredictedLabels[i]]])     
                 # English.append(englishTup)
                 # print("{}".format(self.classNameEnglish[PredictedLabels[i]]) + "(Confidence = {:.3})".format(outputProb[PredictedLabels[i]]))
                 # print("{}".format(self.classNameHindi[PredictedLabels[i]]) + "(आत्मविश्वास = {:.3})".format(outputProb[PredictedLabels[i]]))
