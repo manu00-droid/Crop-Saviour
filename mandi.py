@@ -3,11 +3,12 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import datetime as dt
 from googletrans import Translator
-def prices(ans,context,update,lang):
-    l=ans.split(', ')
+def prices(mandi_info,market,update,context):
+    print("in prices")
+    l=mandi_info.split(', ')
     state=l[0].lower()
     comodity=l[1].lower()
-    r = requests.get('https://www.commodityonline.com/mandiprices/'+comodity)
+    r = requests.get('https://www.commodityonline.com/mandiprices/'+comodity+'/'+state+'/'+market.lower())
     soup = BeautifulSoup(r.content, 'html.parser')
     table = soup.find('table', id='main-table2')
     col=[]
@@ -15,7 +16,6 @@ def prices(ans,context,update,lang):
         s=i.text
         s=s.strip('\n')
         s=s.replace(' ',"")
-        print(s)
         col.append(s)
     df=pd.DataFrame(columns=col)
     for i in table.find_all('tr')[1:]:
@@ -24,20 +24,47 @@ def prices(ans,context,update,lang):
             row.append(j.text)
         df.loc[len(df)]=row
     df=df.drop(['Telegram'],axis=1)
-    print(df.ArrivalDate.unique())
-    print(dt.date.today().strftime("%d/%m/20%y"))
-    if(dt.date.today().strftime("%d/%m/20%y") in df.ArrivalDate.unique()):
-        print("true")
-    if((state.lower() in x.lower() for x in df.State.unique()) and (dt.date.today().strftime("%d/%m/20%y") in df.ArrivalDate.unique())):
-        str1='\t'.join(col[:6])
-        #update.message.reply_text(Translator.translate(text=str1,src='en', dest=lang).text)
+    for i in range(len(df)):
+        data=df.iloc[i,:].to_list()
+        str1='\t'.join(data)
         update.message.reply_text(str1)
-        for i in range(len(df)):
-            if df.iloc[i,3].lower()==state and df.iloc[i,1] == dt.date.today().strftime("%d/%m/20%y"):
-                data=df.iloc[i,:].to_list()
-                str1='\t'.join(data)
-                #update.message.reply_text(Translator.translate(text=str1,src='en', dest=lang).text)
-                update.message.reply_text(str1)
-    else:
-        update.message.reply_text("no data found")
+def market_get(ans,context,update,lang):
+    print("in market get")
+    l=ans.split(', ')
+    state=l[0].lower()
+    comodity=l[1].lower()
+    r = requests.get('https://www.commodityonline.com/mandiprices/'+comodity+'/'+state)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    table = soup.find('table', id='main-table2')
+    col=[]
+    for i in table.find_all('th'):
+        s=i.text
+        s=s.strip('\n')
+        s=s.replace(' ',"")
+        col.append(s)
+    df=pd.DataFrame(columns=col)
+    for i in table.find_all('tr')[1:]:
+        row=[]
+        for j in i.find_all('td'):
+            row.append(j.text)
+        df.loc[len(df)]=row
+    update.message.reply_text('List of available mandi\'s:')
+    for i in df.Market.unique():
+        update.message.reply_text(i)
+    # print(df.ArrivalDate.unique())
+    # print(dt.date.today().strftime("%d/%m/20%y"))
+    # if(dt.date.today().strftime("%d/%m/20%y") in df.ArrivalDate.unique()):
+    #     print("true")
+    # if((state.lower() in x.lower() for x in df.State.unique()) and (dt.date.today().strftime("%d/%m/20%y") in df.ArrivalDate.unique())):
+    #     str1='\t'.join(col[:6])
+    #     #update.message.reply_text(Translator.translate(text=str1,src='en', dest=lang).text)
+    #     update.message.reply_text(str1)
+    #     for i in range(len(df)):
+    #         if df.iloc[i,3].lower()==state and df.iloc[i,1] == dt.date.today().strftime("%d/%m/20%y"):
+    #             data=df.iloc[i,:].to_list()
+    #             str1='\t'.join(data)
+    #             #update.message.reply_text(Translator.translate(text=str1,src='en', dest=lang).text)
+    #             update.message.reply_text(str1)
+    # else:
+    #     update.message.reply_text("no data found")
 # https://www.commodityonline.com/mandiprices/mango

@@ -8,9 +8,10 @@ from torchvision import transforms
 import remedies_rice
 import remedies_wheat
 import translator
-from mandi import prices
+from mandi import prices, market_get
 
 global count
+mandi_info=""
 updater = Updater(token="5212231888:AAE7Wm-esVXOpyckA2W15hhyFvKbshs1QjQ")
 dispatcher = updater.dispatcher
 username = ""
@@ -29,7 +30,7 @@ fin_rice = {0: "Bacterial Blight", 1: "Blast", 2: "Brownspot", 3: "Healthy", 4: 
 fin_wheat = {0: "Healthy", 1: "leaf rust", 2: "Powdery Mildew", 3: "seedlings", 4: "Septoria", 5: "Stem Rust",
              6: "Yellow rust"}
 
-
+print('start')
 def startCommand(update: Update, context: CallbackContext):
     global username
     username = update.message.chat_id
@@ -115,12 +116,19 @@ def model_selection(update: Update, context: CallbackContext):
 
         if lang == "English":
             context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter <name of your state, commodity>")
-        user_input = update.message.text
-        prices(user_input,context,update)
 
 def mandi_handle(update, context):
     user_input = update.message.text
-    prices(user_input,context,update,lang)
+    global mandi_info 
+    mandi_info= user_input
+    print(mandi_info)
+    market_get(user_input,context,update,lang)
+    mandi_price(update,context)
+    
+def mandi_price(update,context):
+    market = update.message.text
+    print(market)
+    prices(mandi_info,market,update,context)
 
 def image_handler(update, context):
     global crop
@@ -238,4 +246,5 @@ dispatcher.add_handler(CallbackQueryHandler(queryHandler))
 dispatcher.add_handler(CallbackQueryHandler(model_selection))
 dispatcher.add_handler(MessageHandler(Filters.photo, image_handler))
 dispatcher.add_handler(MessageHandler(Filters.text, mandi_handle))
+dispatcher.add_handler(MessageHandler(Filters.text, mandi_price))
 updater.start_polling()
