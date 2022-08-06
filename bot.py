@@ -8,7 +8,7 @@ from torchvision import transforms
 import remedies_rice
 import remedies_wheat
 import translator
-from mandi import prices, market_get
+from mandi import prices, market_get, mandi_list
 
 global count
 mandi_info=""
@@ -115,20 +115,24 @@ def model_selection(update: Update, context: CallbackContext):
             context.bot.send_message(chat_id=update.effective_chat.id, text="कृपया दर्ज करें: <राज्य,वस्तु>")
 
         if lang == "English":
-            context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter <name of your state, commodity>")
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Choose one from the following:")
+        mandi_list(update, context)
+        mandi_handle(update, context)
+        # user_input = update.context.get_message
+        # prices(update,context,user_input)
+
 
 def mandi_handle(update, context):
+    print("in mandi handle")
     user_input = update.message.text
-    global mandi_info 
-    mandi_info= user_input
-    print(mandi_info)
-    market_get(user_input,context,update,lang)
-    mandi_price(update,context)
-    
-def mandi_price(update,context):
-    market = update.message.text
-    print(market)
-    prices(mandi_info,market,update,context)
+    print(user_input)
+    prices(update,context,user_input)
+    return
+
+# def mandi_price(update,context):
+#     market = update.message.text
+#     print(market)
+#     prices(mandi_info,market,update,context)
 
 def image_handler(update, context):
     global crop
@@ -243,8 +247,9 @@ dispatcher.add_handler(conv_handler)
 
 dispatcher.add_handler(CommandHandler("start", startCommand))
 dispatcher.add_handler(CallbackQueryHandler(queryHandler))
+dispatcher.add_handler(MessageHandler(Filters.text, mandi_handle))
 dispatcher.add_handler(CallbackQueryHandler(model_selection))
 dispatcher.add_handler(MessageHandler(Filters.photo, image_handler))
-dispatcher.add_handler(MessageHandler(Filters.text, mandi_handle))
-dispatcher.add_handler(MessageHandler(Filters.text, mandi_price))
+
+# dispatcher.add_handler(MessageHandler(Filters.text, mandi_price))
 updater.start_polling()
