@@ -3,11 +3,13 @@ import torch
 from telegram.ext import *
 from requests import *
 from PIL import Image
+import cv2
 import Inference
 from torchvision import transforms
 import remedies_rice
 import remedies_wheat
 import translator
+from weed import weed_chk
 from mandi import prices, market_get, mandi_list
 
 global count
@@ -20,6 +22,7 @@ HindiLang = "हिन्दी"
 PunjLang = "ਪੰਜਾਬੀ"
 EngLang = "English"
 wheat = ["🌾गेहूँ🌾", "🌾ਕਣਕ🌾", "🌾wheat🌾"]
+weed=["खर-पतवार","ਬੂਟੀ","weed"]
 rice = ["🍚चावल🍚", "🍚ਚੌਲ🍚", "🍚rice🍚"]
 mandi = ["💸मंडी की कीमतें💸","💸ਮੰਡੀ ਦੀਆਂ ਕੀਮਤਾਂ💸","💸mandi prices💸"]
 lang = ""
@@ -51,7 +54,8 @@ def queryHandler(update: Update, context: CallbackContext):
         lang = "Hindi"
         buttons = [[InlineKeyboardButton(wheat[0], callback_data="wheat")],
                    [InlineKeyboardButton(rice[0], callback_data="rice")],
-                   [InlineKeyboardButton(mandi[0],callback_data="mandi")]
+                   [InlineKeyboardButton(weed[0],callback_data="weed")],
+                   [InlineKeyboardButton(mandi[0],callback_data="mandi")]                   
                    ]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="आप किस फसल के बारे में जानना चाहते हैं?")
@@ -60,7 +64,9 @@ def queryHandler(update: Update, context: CallbackContext):
         lang = "Punjabi"
         buttons = [[InlineKeyboardButton(wheat[1], callback_data="wheat")],
                    [InlineKeyboardButton(rice[1], callback_data="rice")],
-                   [InlineKeyboardButton(mandi[1],callback_data="mandi")]]
+                   [InlineKeyboardButton(weed[1],callback_data="weed")],
+                   [InlineKeyboardButton(mandi[1],callback_data="mandi")]
+                   ]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="ਤੁਸੀਂ ਕਿਸ ਫਸਲ ਬਾਰੇ ਜਾਣਨਾ ਚਾਹੁੰਦੇ ਹੋ?")
 
@@ -68,7 +74,9 @@ def queryHandler(update: Update, context: CallbackContext):
         lang = "English"
         buttons = [[InlineKeyboardButton(wheat[2], callback_data="wheat")],
                    [InlineKeyboardButton(rice[2], callback_data="rice")],
-                   [InlineKeyboardButton(mandi[2],callback_data="mandi")]]
+                   [InlineKeyboardButton(weed[2],callback_data="weed")],
+                   [InlineKeyboardButton(mandi[2],callback_data="mandi")]
+                   ]
         context.bot.send_message(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(buttons),
                                  text="Which crop do you want to know about?")
 
@@ -107,6 +115,16 @@ def model_selection(update: Update, context: CallbackContext):
 
         if lang == "English":
             context.bot.send_message(chat_id=update.effective_chat.id, text="Please upload the images of your crops...")
+    elif query == "weed":
+        crop = 2
+        if lang == "Punjabi":
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="ਕਿਰਪਾ ਕਰਕੇ ਬੂਟੀ ਦੀਆਂ ਤਸਵੀਰਾਂ ਅਪਲੋਡ ਕਰੋ...")
+        if lang == "Hindi":
+            context.bot.send_message(chat_id=update.effective_chat.id, text="कृपया खरपतवार की तस्वीरें अपलोड करें....")
+
+        if lang == "English":
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Please upload the images of the weed...")
     elif query == "mandi":
         if lang == "Punjabi":
             context.bot.send_message(chat_id=update.effective_chat.id,
@@ -190,6 +208,17 @@ def image_handler(update, context):
                                                'rb'))
                 except:
                     update.message.reply_text("No audio Available")
+    elif crop == 2:
+        pred=proc_weed(im,update,context)
+        
+
+#WEED MODEL
+
+def proc_weed(im,update,context):
+    img=weed_chk(im)
+    cv2.imwrite('img'+str(username)+'.png', img)
+    context.bot.send_photo(chat_id=username, photo=open('img'+str(username)+'.png', 'rb'))
+    return
 
 #RICE MODEL
 
