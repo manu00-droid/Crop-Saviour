@@ -222,6 +222,7 @@ def proc_weed(im,update,context):
 
 #RICE MODEL
 
+
 def proc_rice(im):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = torch.load('rice.pt', map_location=device)
