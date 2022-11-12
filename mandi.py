@@ -34,6 +34,7 @@ def mandi_list(update, context):
     for i in np.unique(ls):
         context.bot.send_message(chat_id=update.effective_chat.id, text=i)
     context.bot.send_message(chat_id=update.effective_chat.id, text="Rice: ")
+    
     r = requests.get('https://www.commodityonline.com/mandiprices/rice/kerala/')
     soup = BeautifulSoup(r.content, 'html.parser')
     table = soup.find('table', id='main-table2')
@@ -44,7 +45,7 @@ def mandi_list(update, context):
         s = s.replace(' ', "")
         col.append(s)
     df = pd.DataFrame(columns=col)
-    for i in table.find_all('tr')[1:]:
+   for i in table.find_all('tr')[1:]:
         row = []
         for j in i.find_all('td'):
             row.append(j.text)
